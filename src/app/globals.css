@@ -1,0 +1,274 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans-override);
+  --font-mono: var(--font-mono-override);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* PyLab custom */
+  --color-lab-terminal: var(--lab-terminal);
+  --color-lab-terminal-border: var(--lab-terminal-border);
+  --color-lab-green: var(--lab-green);
+  --color-lab-dim: var(--lab-dim);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* PyLab dark terminal palette (single dark theme) */
+  --background: oklch(0.144 0.012 165);
+  --foreground: oklch(0.93 0.008 155);
+  --card: oklch(0.178 0.013 165);
+  --card-foreground: oklch(0.93 0.008 155);
+  --popover: oklch(0.192 0.014 165);
+  --popover-foreground: oklch(0.93 0.008 155);
+  --primary: oklch(0.77 0.14 165);
+  --primary-foreground: oklch(0.16 0.02 165);
+  --secondary: oklch(0.24 0.016 165);
+  --secondary-foreground: oklch(0.93 0.008 155);
+  --muted: oklch(0.23 0.014 165);
+  --muted-foreground: oklch(0.64 0.015 160);
+  --accent: oklch(0.26 0.02 165);
+  --accent-foreground: oklch(0.95 0.01 155);
+  --destructive: oklch(0.63 0.2 25);
+  --destructive-foreground: oklch(0.98 0.005 25);
+  --border: oklch(0.27 0.016 165);
+  --input: oklch(0.3 0.016 165);
+  --ring: oklch(0.65 0.1 165);
+  --chart-1: oklch(0.77 0.14 165);
+  --chart-2: oklch(0.8 0.16 85);
+  --chart-3: oklch(0.72 0.13 300);
+  --chart-4: oklch(0.75 0.13 245);
+  --chart-5: oklch(0.7 0.18 25);
+  --sidebar: oklch(0.165 0.013 165);
+  --sidebar-foreground: oklch(0.93 0.008 155);
+  --sidebar-primary: oklch(0.77 0.14 165);
+  --sidebar-primary-foreground: oklch(0.16 0.02 165);
+  --sidebar-accent: oklch(0.24 0.016 165);
+  --sidebar-accent-foreground: oklch(0.95 0.01 155);
+  --sidebar-border: oklch(0.26 0.015 165);
+  --sidebar-ring: oklch(0.65 0.1 165);
+  --lab-terminal: oklch(0.115 0.01 165);
+  --lab-terminal-border: oklch(0.24 0.015 165);
+  --lab-green: oklch(0.8 0.17 160);
+  --lab-dim: oklch(0.52 0.015 160);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background: oklch(0.77 0.14 165 / 0.3);
+  }
+}
+
+/* ── Scrollbars ─────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.32 0.02 165) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: oklch(0.3 0.02 165);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.4 0.02 165);
+}
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ── CodeMirror: PyLab theme overrides ──────────────────── */
+.cm-editor {
+  background: transparent !important;
+  font-size: 13.5px;
+}
+.cm-editor.cm-focused {
+  outline: none !important;
+}
+.cm-scroller {
+  font-family: var(--font-mono-override) !important;
+  line-height: 1.6 !important;
+}
+.cm-gutters {
+  background: transparent !important;
+  border-right: 1px solid oklch(0.24 0.015 165) !important;
+  color: oklch(0.42 0.015 160) !important;
+}
+.cm-activeLineGutter {
+  background: oklch(0.2 0.015 165) !important;
+  color: oklch(0.7 0.05 160) !important;
+}
+.cm-activeLine {
+  background: oklch(0.2 0.012 165 / 0.5) !important;
+}
+.cm-selectionBackground, .cm-editor ::selection {
+  background: oklch(0.4 0.05 165 / 0.35) !important;
+}
+.cm-cursor {
+  border-left-color: var(--lab-green) !important;
+  border-left-width: 2px !important;
+}
+.cm-tooltip {
+  background: oklch(0.19 0.014 165) !important;
+  border: 1px solid oklch(0.3 0.016 165) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+.cm-tooltip-autocomplete ul li[aria-selected] {
+  background: oklch(0.3 0.02 165) !important;
+  color: oklch(0.93 0.008 155) !important;
+}
+
+/* ── Terminal output ────────────────────────────────────── */
+.pylab-terminal {
+  font-family: var(--font-mono-override);
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── Markdown prose (dark, compact) ─────────────────────── */
+.pylab-prose {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: oklch(0.88 0.008 155);
+}
+.pylab-prose p { margin: 0.55em 0; }
+.pylab-prose h1, .pylab-prose h2, .pylab-prose h3 {
+  font-weight: 700;
+  color: oklch(0.95 0.008 155);
+  margin: 1em 0 0.4em 0;
+}
+.pylab-prose h1 { font-size: 1.15rem; }
+.pylab-prose h2 { font-size: 1.05rem; }
+.pylab-prose h3 { font-size: 0.98rem; }
+.pylab-prose ul, .pylab-prose ol { margin: 0.5em 0; padding-left: 1.3em; }
+.pylab-prose li { margin: 0.25em 0; }
+.pylab-prose code {
+  font-family: var(--font-mono-override);
+  font-size: 0.85em;
+  background: oklch(0.24 0.016 165);
+  border: 1px solid oklch(0.28 0.015 165);
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  color: oklch(0.83 0.09 160);
+}
+.pylab-prose pre {
+  background: var(--lab-terminal);
+  border: 1px solid var(--lab-terminal-border);
+  border-radius: 8px;
+  padding: 0.8em 1em;
+  overflow-x: auto;
+  margin: 0.6em 0;
+  font-size: 0.82rem;
+}
+.pylab-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: oklch(0.85 0.02 160);
+}
+.pylab-prose strong { color: oklch(0.96 0.01 155); font-weight: 650; }
+.pylab-prose em { color: oklch(0.8 0.04 150); }
+.pylab-prose blockquote {
+  border-left: 3px solid oklch(0.77 0.14 165 / 0.6);
+  padding-left: 0.9em;
+  color: var(--muted-foreground);
+  margin: 0.6em 0;
+}
+.pylab-prose a { color: var(--lab-green); text-decoration: underline; text-underline-offset: 3px; }
+.pylab-prose table { width: 100%; border-collapse: collapse; margin: 0.7em 0; font-size: 0.86rem; }
+.pylab-prose th, .pylab-prose td {
+  border: 1px solid var(--border);
+  padding: 0.4em 0.65em;
+  text-align: left;
+}
+.pylab-prose th { background: oklch(0.22 0.015 165); font-weight: 600; }
+
+/* ── Cell run animation ─────────────────────────────────── */
+@keyframes cell-ran {
+  0% { box-shadow: 0 0 0 0 oklch(0.77 0.14 165 / 0.5); }
+  100% { box-shadow: 0 0 0 9px oklch(0.77 0.14 165 / 0); }
+}
+.cell-ran {
+  animation: cell-ran 0.7s ease-out;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.28s ease-out both;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent, oklch(0.35 0.03 165 / 0.4), transparent);
+  background-size: 400px 100%;
+  animation: shimmer 1.3s infinite;
+}
+
+/* thin focus ring for keyboard nav */
+.focus-ring:focus-visible {
+  outline: 2px solid oklch(0.77 0.14 165 / 0.7);
+  outline-offset: 2px;
+}
