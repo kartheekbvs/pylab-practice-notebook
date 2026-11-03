@@ -1,9 +1,12 @@
 {
-  "name": "nextjs_tailwind_shadcn_ts",
+  "name": "pylab-practice-notebook",
   "version": "0.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf-typegen": "wrangler types",
     "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",
@@ -84,6 +87,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.15",
     "@tailwindcss/postcss": "^4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -92,6 +96,7 @@
     "eslint-config-next": "^16.1.1",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.5",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "4.156.2"
   }
 }
