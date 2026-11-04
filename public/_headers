@@ -1,3 +1,11 @@
 # Hashed, immutable build assets
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Vendored TensorFlow.js runtime (versionless path — moderate cache)
+/vendor/tfjs/*
+  Cache-Control: public, max-age=14400
+
+# Bundled practice datasets (deterministic content)
+/tfdata/*
+  Cache-Control: public, max-age=14400

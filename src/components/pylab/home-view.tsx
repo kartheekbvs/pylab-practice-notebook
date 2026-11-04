@@ -64,11 +64,11 @@ export function HomeView() {
             Py<span className="text-primary">Lab</span> Practice Notebook
           </h1>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
-            The complete Python &amp; Data Science curriculum of{" "}
-            <span className="text-foreground/90">PyDocs</span> as an interactive
-            notebook: run every reference example in a live kernel, then prove
-            your understanding with HackerRank-style exercises — real test cases,
-            hidden edge cases, instant grading.
+            The complete Python &amp; Data Science curriculum —{" "}
+            <span className="text-foreground/90">basics to deep learning</span> — as an
+            interactive notebook: run every reference example in a live kernel, then
+            prove your understanding with HackerRank-style exercises — real test
+            cases, hidden edge cases, instant grading.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -211,7 +211,7 @@ export function HomeView() {
         <HowCard
           step="01"
           title="Learn by running"
-          body="Every PyDocs reference example is a live notebook cell. Edit it, run it with Shift+Enter, see real output and plots — powered by a real CPython kernel (Pyodide) with NumPy, Pandas, Matplotlib, Seaborn and scikit-learn."
+          body="Every reference example is a live notebook cell. Edit it, run it with Shift+Enter, see real output and plots — powered by a real CPython kernel (Pyodide) with NumPy, Pandas, Matplotlib, Seaborn and scikit-learn."
         />
         <HowCard
           step="02"

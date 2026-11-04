@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { kernel } from "@/lib/kernel/manager";
+import { kernel, KernelManager } from "@/lib/kernel/manager";
 import { KernelStatus } from "@/lib/kernel/protocol";
 import { RotateCcw, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,23 +16,30 @@ const STATUS_META: Record<KernelStatus, { label: string; color: string; pulse?: 
   error: { label: "Kernel error", color: "bg-red-400" },
 };
 
-export function KernelStatusBadge({ compact = false }: { compact?: boolean }) {
+export function KernelStatusBadge({
+  compact = false,
+  target = kernel,
+}: {
+  compact?: boolean;
+  /** which kernel to reflect (Python/Pyodide by default, TFJS on DL pages) */
+  target?: KernelManager;
+}) {
   const [state, setState] = useState(() => ({
-    status: kernel.status,
-    detail: kernel.detail,
-    pythonInfo: kernel.pythonInfo,
+    status: target.status,
+    detail: target.detail,
+    runtimeInfo: target.runtimeInfo,
   }));
 
   useEffect(() => {
-    const unsub = kernel.subscribe(() =>
+    const unsub = target.subscribe(() =>
       setState({
-        status: kernel.status,
-        detail: kernel.detail,
-        pythonInfo: kernel.pythonInfo,
+        status: target.status,
+        detail: target.detail,
+        runtimeInfo: target.runtimeInfo,
       })
     );
     return unsub;
-  }, []);
+  }, [target]);
 
   const meta = STATUS_META[state.status];
 
@@ -40,11 +47,11 @@ export function KernelStatusBadge({ compact = false }: { compact?: boolean }) {
     <div className="flex items-center gap-2">
       <div
         className="group relative flex items-center gap-2 rounded-full border border-border bg-card/70 py-1 pl-2.5 pr-3"
-        title={state.pythonInfo || state.detail || meta.label}
+        title={state.runtimeInfo || state.detail || meta.label}
       >
         <span className={cn("h-2 w-2 rounded-full", meta.color, meta.pulse && "pulse-dot")} />
         <span className="max-w-[150px] truncate font-mono text-[10.5px] text-muted-foreground">
-          {compact ? (state.pythonInfo.split(" · ")[0] || meta.label) : meta.label}
+          {compact ? (state.runtimeInfo.split(" · ")[0] || meta.label) : meta.label}
         </span>
         {state.status === "loading-pkg" && !compact && (
           <span className="shimmer h-2 w-8 rounded-full" />
@@ -53,16 +60,16 @@ export function KernelStatusBadge({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="flex items-center gap-1">
           <button
-            onClick={() => kernel.reset()}
+            onClick={() => target.reset()}
             className="focus-ring rounded-md border border-border bg-card/70 p-1.5 text-muted-foreground transition-colors hover:text-foreground"
             title="Clear kernel memory (variables defined in cells)"
           >
             <Trash2 size={13} />
           </button>
           <button
-            onClick={() => kernel.restart()}
+            onClick={() => target.restart()}
             className="focus-ring rounded-md border border-border bg-card/70 p-1.5 text-muted-foreground transition-colors hover:text-foreground"
-            title="Restart kernel (fresh Python)"
+            title="Restart kernel"
           >
             <RotateCcw size={13} />
           </button>

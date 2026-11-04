@@ -2,6 +2,7 @@
 
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
+import { javascript } from "@codemirror/lang-javascript";
 import { createTheme } from "@uiw/codemirror-themes";
 import { tags as t } from "@lezer/highlight";
 import { useEffect, useMemo, useRef } from "react";
@@ -46,6 +47,7 @@ interface CodeEditorProps {
   minHeight?: string;
   maxHeight?: string;
   ariaLabel?: string;
+  language?: "python" | "javascript";
   onRunShortcut?: () => void; // Shift+Enter
   onSubmitShortcut?: () => void; // Ctrl/Cmd+Enter
   autoFocus?: boolean;
@@ -58,6 +60,7 @@ export function CodeEditor({
   minHeight = "auto",
   maxHeight,
   ariaLabel,
+  language = "python",
   onRunShortcut,
   onSubmitShortcut,
   autoFocus,
@@ -69,7 +72,10 @@ export function CodeEditor({
     submitRef.current = onSubmitShortcut;
   });
 
-  const extensions = useMemo(() => [python()], []);
+  const extensions = useMemo(
+    () => [language === "javascript" ? javascript() : python()],
+    [language]
+  );
 
   useEffect(() => {
     if (autoFocus) {

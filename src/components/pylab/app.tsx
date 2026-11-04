@@ -20,7 +20,7 @@ import { loadConcept, loadExerciseById, ExerciseRef } from "@/lib/content";
 import { Concept } from "@/lib/content/types";
 import { navigate, useRoute, useRouteEffect } from "@/lib/store/router";
 import { useProgress, levelForXp } from "@/lib/store/progress";
-import { kernel } from "@/lib/kernel/manager";
+import { kernelForModule } from "@/lib/kernel/manager";
 import { KernelStatusBadge } from "./kernel-badge";
 import { HomeView } from "./home-view";
 import { ModuleView } from "./module-view";
@@ -83,6 +83,16 @@ export function PyLabApp() {
     window.scrollTo({ top: 0 });
     setSidebarOpen(false);
   });
+
+  // The topbar kernel badge follows the active module's kernel
+  // (Python/Pyodide everywhere, TensorFlow.js on the deep-learning module).
+  const activeModule =
+    route.name === "module" || route.name === "concept"
+      ? MODULE_REGISTRY.find((m) => m.id === route.moduleId)
+      : route.name === "exercise" && exerciseRef
+        ? exerciseRef.module
+        : undefined;
+  const badgeKernel = kernelForModule(activeModule);
 
   const openConcept = useCallback(
     (conceptId: string) => {
@@ -214,10 +224,10 @@ export function PyLabApp() {
               <Zap size={12} /> {xp} XP
             </span>
             <div className="hidden md:block">
-              <KernelStatusBadge />
+              <KernelStatusBadge target={badgeKernel} />
             </div>
             <div className="md:hidden">
-              <KernelStatusBadge compact />
+              <KernelStatusBadge compact target={badgeKernel} />
             </div>
           </div>
         </header>
@@ -258,16 +268,16 @@ export function PyLabApp() {
         </main>
 
         <footer className="mt-auto border-t border-border bg-card/30 px-4 py-3.5 text-center text-[11px] text-lab-dim sm:px-6">
-          PyLab Practice Notebook · built on the{" "}
+          PyLab Practice Notebook · source &amp; curriculum on{" "}
           <a
-            href="https://github.com/kartheekbvs/gow"
+            href="https://github.com/kartheekbvs/pylab-practice-notebook"
             target="_blank"
             rel="noreferrer"
             className="underline underline-offset-2 hover:text-primary"
           >
-            kartheekbvs/gow
+            kartheekbvs/pylab-practice-notebook
           </a>{" "}
-          PyDocs curriculum · Python runs locally in your browser via{" "}
+          · Python runs locally in your browser via{" "}
           <a
             href="https://pyodide.org"
             target="_blank"
@@ -275,6 +285,15 @@ export function PyLabApp() {
             className="underline underline-offset-2 hover:text-primary"
           >
             Pyodide
+          </a>{" "}
+          · deep learning via{" "}
+          <a
+            href="https://www.tensorflow.org/js"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2 hover:text-primary"
+          >
+            TensorFlow.js
           </a>{" "}
           · progress stored in this browser
         </footer>

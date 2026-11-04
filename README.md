@@ -1,9 +1,15 @@
 # PyLab Practice Notebook
 
-Interactive Python & Data Science practice platform built on the
-[PyDocs curriculum](https://github.com/kartheekbvs/gow) — 73 concepts, 314
-HackerRank-style graded exercises, and a real Python kernel (Pyodide) running
-in the browser with numpy, pandas, matplotlib, seaborn and scikit-learn.
+Interactive Python & Data Science practice platform — 85 concepts, 406
+HackerRank-style graded exercises, and two real kernels running in the browser:
+
+- **Python kernel** (Pyodide / CPython-WASM) with numpy, pandas, matplotlib,
+  seaborn and scikit-learn.
+- **TensorFlow.js kernel** (vendored `tf.min.js`, CPU backend) — the deep-learning
+  module is fully live: 17 concepts from tensors, layers and training loops
+  through CNNs, RNNs / LSTMs / GRUs, embeddings & tokenization, attention and
+  transformers, with 92 JavaScript exercises graded by the same harness that
+  validated them offline.
 
 ## Local development
 

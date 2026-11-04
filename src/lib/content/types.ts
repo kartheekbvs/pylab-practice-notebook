@@ -1,7 +1,9 @@
-// Content model for PyLab — concepts, examples (from the gow/PyDocs repo,
-// unchanged) and authored exercises.
+// Content model for PyLab — concepts, examples and authored exercises.
 
 export type Difficulty = "easy" | "medium" | "hard" | "expert";
+
+/** Exercise language: "py" runs on the Pyodide kernel, "js" on the TFJS kernel. */
+export type ExerciseLang = "py" | "js";
 
 export type TestKind =
   | "exact"
@@ -33,6 +35,7 @@ export interface WorkedExample {
 
 export interface Exercise {
   id: string;
+  lang?: ExerciseLang;
   title: string;
   difficulty: Difficulty;
   xp: number;
@@ -54,16 +57,47 @@ export type BlockType =
   | "params"
   | "sig"
   | "methods"
-  | "playground";
+  | "playground"
+  | "visual";
+
+/** One layer of a network-architecture diagram (see <ArchDiagram/>). */
+export interface ArchLayerSpec {
+  type: string; // dense | conv2d | maxpool | flatten | dropout | batchnorm | embedding | rnn | lstm | gru | bidirectional | attention | mha | output
+  units?: number;
+  activation?: string;
+  filters?: number;
+  kernelSize?: number;
+  strides?: number;
+  rate?: number;
+  inputDim?: number;
+  outputDim?: number;
+  heads?: number;
+  poolSize?: number;
+  returnSequences?: boolean;
+  label?: string;
+}
+
+export interface ArchSpec {
+  input: number;
+  inputLabel?: string;
+  layers: ArchLayerSpec[];
+}
+
+export interface AttentionSpec {
+  tokens: string[];
+  weights: number[][];
+  caption?: string;
+}
 
 export interface ContentBlock {
   type: BlockType;
   title?: string;
   code?: string;
   output?: string[];
-  kind?: string;
+  kind?: string; // note: note|warning · visual: arch-diagram|attention|nn-playground
   text?: string;
   rows?: string[][];
+  spec?: ArchSpec | AttentionSpec | Record<string, unknown>; // visual payload
 }
 
 export interface Concept {

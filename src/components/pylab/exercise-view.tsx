@@ -27,7 +27,7 @@ import {
 import { ExerciseRef } from "@/lib/content";
 import { Exercise } from "@/lib/content/types";
 import { TestRunPayload } from "@/lib/kernel/protocol";
-import { kernel } from "@/lib/kernel/manager";
+import { kernelForModule } from "@/lib/kernel/manager";
 import { CodeEditor } from "./code-editor";
 import { Markdown } from "./markdown";
 import { DifficultyChip } from "./notebook-view";
@@ -49,6 +49,9 @@ export function ExerciseView({ exerciseRef }: { exerciseRef: ExerciseRef }) {
 
   const isSolved = !!solvedMap[exercise.id];
   const hintsRevealed = hintsRevealedMap[exercise.id] ?? 0;
+  // TF/Keras exercises (lang "js") execute on the TensorFlow.js kernel
+  const exKernel = kernelForModule(moduleMeta);
+  const editorLang = exercise.lang === "js" ? "javascript" : "python";
 
   const [code, setCode] = useState(() => drafts[exercise.id] ?? exercise.starterCode);
   const [runResult, setRunResult] = useState<TestRunPayload | null>(null);
@@ -63,11 +66,11 @@ export function ExerciseView({ exerciseRef }: { exerciseRef: ExerciseRef }) {
 
   // preload module packages in the background
   useEffect(() => {
-    kernel.boot();
+    exKernel.boot();
     if (moduleMeta.runnable && moduleMeta.packages.length > 0) {
-      kernel.ensurePackages(moduleMeta.packages).catch(() => {});
+      exKernel.ensurePackages(moduleMeta.packages).catch(() => {});
     }
-  }, [moduleMeta]);
+  }, [moduleMeta, exKernel]);
 
   const grade = useCallback(
     async (mode: "run" | "submit") => {
@@ -77,14 +80,14 @@ export function ExerciseView({ exerciseRef }: { exerciseRef: ExerciseRef }) {
       if (mode === "run") setRunResult(null);
       else setSubmitResult(null);
       try {
-        await kernel.ensurePackages(moduleMeta.packages);
+        await exKernel.ensurePackages(moduleMeta.packages);
         // Sample runs grade ONLY the visible tests — hidden tests are sent
         // exclusively on Submit (HackerRank semantics).
         const spec =
           mode === "run"
             ? { bootstrap: exercise.bootstrap, tests: exercise.tests.filter((t) => !t.hidden) }
             : { bootstrap: exercise.bootstrap, tests: exercise.tests };
-        const res = await kernel.runTests(code, spec);
+        const res = await exKernel.runTests(code, spec);
         touchDay();
         if (mode === "run") setRunResult(res);
         else {
@@ -111,7 +114,7 @@ export function ExerciseView({ exerciseRef }: { exerciseRef: ExerciseRef }) {
         setRunning("none");
       }
     },
-    [running, moduleMeta.packages, code, touchDay, recordAttempt, exercise, hintsRevealed, markSolved]
+    [running, moduleMeta, exKernel, code, touchDay, recordAttempt, exercise, hintsRevealed, markSolved]
   );
 
   const visibleTests = exercise.tests.filter((t) => !t.hidden);
@@ -283,6 +286,7 @@ export function ExerciseView({ exerciseRef }: { exerciseRef: ExerciseRef }) {
 
           <CodeEditor
             value={code}
+            language={editorLang}
             onChange={(v) => {
               setCode(v);
               setDraft(exercise.id, v);

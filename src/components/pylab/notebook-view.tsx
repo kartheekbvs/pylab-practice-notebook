@@ -27,7 +27,9 @@ import {
 import { RegistryModule } from "@/lib/content/registry.generated";
 import { CodeCell, NoteCallout } from "./code-cell";
 import { Markdown } from "./markdown";
-import { kernel } from "@/lib/kernel/manager";
+import { VisualBlock } from "./visuals";
+import { NNPlayground } from "./nn-playground";
+import { kernel, kernelForModule } from "@/lib/kernel/manager";
 import { KernelStatusBadge } from "./kernel-badge";
 import { useProgress } from "@/lib/store/progress";
 import { navigate } from "@/lib/store/router";
@@ -72,13 +74,16 @@ export function NotebookView({
     [concept, moduleMeta.id]
   );
 
+  const cellKernel = kernelForModule(moduleMeta);
+  const cellLanguage = moduleMeta.kernel === "tfjs" ? "javascript" : "python";
+
   useEffect(() => {
     visitConcept(moduleMeta.id, concept.id);
-    kernel.boot();
+    cellKernel.boot();
     if (moduleMeta.runnable && moduleMeta.packages.length > 0) {
       kernel.ensurePackages(moduleMeta.packages).catch(() => {});
     }
-  }, [concept.id, moduleMeta.id, moduleMeta.packages, moduleMeta.runnable, visitConcept]);
+  }, [concept.id, moduleMeta.id, moduleMeta.packages, moduleMeta.runnable, visitConcept, cellKernel]);
 
   const codeBlocks = concept.blocks.filter((b) => b.type === "code").length;
   const ranCells = cellKeys.filter((k) => (cellRuns[k] ?? 0) > 0).length;
@@ -136,7 +141,7 @@ export function NotebookView({
           )}
         </div>
         <div className="flex flex-col items-end gap-2">
-          <KernelStatusBadge />
+          <KernelStatusBadge target={cellKernel} />
           {codeBlocks > 0 && moduleMeta.runnable && (
             <button
               onClick={runAll}
@@ -156,11 +161,9 @@ export function NotebookView({
 
       {!moduleMeta.runnable && (
         <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
-          <strong className="font-semibold">Reference module.</strong> TensorFlow
-          cannot execute in the browser kernel (no WebAssembly build), so this
+          <strong className="font-semibold">Reference module.</strong> This
           chapter is read-and-learn: study the code examples line by line with the
-          explanation, then practice the same patterns in the NumPy / sklearn
-          modules where everything runs live.
+          explanation, then practice the same patterns in the runnable modules.
         </div>
       )}
 
@@ -206,6 +209,8 @@ export function NotebookView({
                 cellKey={`${moduleMeta.id}/${concept.id}/${i}`}
                 packages={moduleMeta.runnable ? moduleMeta.packages : []}
                 readOnly={!moduleMeta.runnable}
+                language={cellLanguage}
+                cellKernel={cellKernel}
                 seqRef={seqRef}
                 runRequestsRef={runRequestsRef}
               />
@@ -227,7 +232,7 @@ export function NotebookView({
         {concept.exercises.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/30 px-4 py-6 text-center text-sm text-muted-foreground">
             This reference concept has no executable exercises in the browser
-            kernel. Continue to the next runnable module to keep practicing.
+            kernel. Continue to the next module to keep practicing.
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
@@ -255,6 +260,8 @@ function BlockView({
   cellKey,
   packages,
   readOnly,
+  language,
+  cellKernel,
   seqRef,
   runRequestsRef,
 }: {
@@ -262,9 +269,19 @@ function BlockView({
   cellKey: string;
   packages: string[];
   readOnly?: boolean;
+  language?: "python" | "javascript";
+  cellKernel?: ReturnType<typeof kernelForModule>;
   seqRef: React.MutableRefObject<number>;
   runRequestsRef: React.MutableRefObject<Record<string, (() => void) | null>>;
 }) {
+  if (block.type === "visual") {
+    if (block.kind === "nn-playground") {
+      return <NNPlayground />;
+    }
+    return (
+      <VisualBlock kind={block.kind} spec={block.spec} text={block.text} title={block.title} />
+    );
+  }
   if (block.type === "code") {
     return (
       <CodeCell
@@ -275,6 +292,8 @@ function BlockView({
         code={block.code ?? ""}
         expectedOutput={block.output}
         packages={packages}
+        language={language}
+        kernel={cellKernel}
         seqRef={seqRef}
         runRequestRef={{
           get current() {
@@ -296,6 +315,8 @@ function BlockView({
         title="🧪 Playground — edit & run"
         code={block.code ?? ""}
         packages={packages}
+        language={language}
+        kernel={cellKernel}
         seqRef={seqRef}
         runRequestRef={{
           get current() {

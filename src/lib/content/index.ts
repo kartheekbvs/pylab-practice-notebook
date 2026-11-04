@@ -85,6 +85,7 @@ export function moduleForExerciseId(
     "sk-": "sklearn",
     mpl: "matplotlib",
     sns: "seaborn",
+    "tf-": "tensorflow",
   };
   for (const [prefix, moduleId] of Object.entries(map)) {
     if (exerciseId.startsWith(prefix)) {

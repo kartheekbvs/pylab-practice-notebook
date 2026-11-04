@@ -38,7 +38,7 @@ export function ModuleView({
       sklearn: ["sk-"],
       matplotlib: ["mpl-"],
       seaborn: ["sns-"],
-      tensorflow: [],
+      tensorflow: ["tf-"],
     };
     const prefixesForModule = prefixes[moduleMeta.id] ?? [];
     return Object.keys(solved).filter((id) =>

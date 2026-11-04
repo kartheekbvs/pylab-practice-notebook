@@ -81,7 +81,7 @@ export function ProgressView() {
       sklearn: ["sk-"],
       matplotlib: ["mpl-"],
       seaborn: ["sns-"],
-      tensorflow: [],
+      tensorflow: ["tf-"],
     };
     return MODULE_REGISTRY.map((m) => {
       const ps = prefixes[m.id] ?? [];

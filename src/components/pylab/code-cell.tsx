@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Play, RotateCcw, Loader2, ChevronRight, Eye, EyeOff } from "lucide-react";
-import { kernel } from "@/lib/kernel/manager";
+import { KernelManager, kernel as defaultKernel } from "@/lib/kernel/manager";
 import { RunResultPayload } from "@/lib/kernel/protocol";
 import { CodeEditor } from "./code-editor";
 import { CellOutput } from "./cell-output";
@@ -21,7 +21,9 @@ interface CodeCellProps {
   seqRef: React.MutableRefObject<number>;
   onRan?: () => void;
   runRequestRef?: React.MutableRefObject<(() => void) | null>;
-  readOnly?: boolean; // reference modules (TensorFlow) — study, don't execute
+  readOnly?: boolean; // non-runnable modules — study, don't execute
+  language?: "python" | "javascript";
+  kernel?: KernelManager; // which worker executes this cell
 }
 
 export function CodeCell({
@@ -34,6 +36,8 @@ export function CodeCell({
   onRan,
   runRequestRef,
   readOnly = false,
+  language = "python",
+  kernel = defaultKernel,
 }: CodeCellProps) {
   const stored = useProgress((s) => s.cellEdits[cellKey]);
   const setCellEdit = useProgress((s) => s.setCellEdit);
@@ -71,7 +75,7 @@ export function CodeCell({
     } finally {
       setRunning(false);
     }
-  }, [running, packages, value, seqRef, recordCellRun, cellKey, touchDay, onRan]);
+  }, [running, packages, value, seqRef, recordCellRun, cellKey, touchDay, onRan, kernel]);
 
   useEffect(() => {
     if (runRequestRef) runRequestRef.current = run;
@@ -103,7 +107,7 @@ export function CodeCell({
             <button
               onClick={() => setShowExpected((s) => !s)}
               className="focus-ring inline-flex h-7 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              title="Toggle the expected output recorded in the PyDocs reference"
+              title="Toggle the expected output recorded from the reference run"
             >
               {showExpected ? <EyeOff size={13} /> : <Eye size={13} />}
               <span className="hidden sm:inline">
@@ -118,7 +122,7 @@ export function CodeCell({
                 setValue(code);
               }}
               className="focus-ring inline-flex h-7 items-center gap-1 rounded-md px-2 text-[11px] text-amber-300/90 transition-colors hover:bg-accent"
-              title="Restore the original PyDocs example code"
+              title="Restore the original example code"
             >
               <RotateCcw size={13} />
               <span className="hidden sm:inline">reset</span>
@@ -145,6 +149,7 @@ export function CodeCell({
         <CodeEditor
           value={value}
           readOnly={readOnly}
+          language={language}
           onChange={(v) => {
             setValue(v);
             setCellEdit(cellKey, v);
@@ -157,7 +162,7 @@ export function CodeCell({
       {showExpected && expectedOutput && expectedOutput.length > 0 && (
         <div className="border-t border-border/60 bg-secondary/30 px-3.5 py-2">
           <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-lab-dim">
-            Expected output (PyDocs)
+            Expected output
           </div>
           <div className="pylab-terminal text-muted-foreground">
             {expectedOutput.join("\n")}

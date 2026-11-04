@@ -44,15 +44,18 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     "no-useless-escape": "off",
   },
 }, {
-  // Vendored shadcn/ui scaffold files and the prebuilt kernel worker are not
-  // authored by this project — relax the stricter new react-hooks rules there.
-  files: ["src/components/ui/**", "src/hooks/**", "public/*.js"],
+  // Vendored shadcn/ui scaffold files, the prebuilt kernel workers and the
+  // imperative canvas playground (syncs external tf.js/dataset state) are not
+  // conventional authored code — relax the stricter new react-hooks rules there.
+  files: ["src/components/ui/**", "src/hooks/**", "public/*.js", "src/components/pylab/nn-playground.tsx"],
   rules: {
     "react-hooks/set-state-in-effect": "off",
     "react-hooks/refs": "off",
+    "react-hooks/immutability": "off",
+    "react-hooks/preserve-manual-memoization": "off",
   },
 }, {
-  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "examples/**", "skills", "scripts/**", "mini-services/**", "gow-repo/**"]
+  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "examples/**", "skills", "scripts/**", "mini-services/**", "gow-repo/**", "public/vendor/**"]
 }];
 
 export default eslintConfig;

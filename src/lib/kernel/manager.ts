@@ -1,6 +1,10 @@
 "use client";
 
-// PyLab kernel manager — owns the Pyodide web worker.
+// PyLab kernel manager — owns the compute web workers.
+// Two kernels exist:
+//   • kernel     — Pyodide (CPython/WASM) for the Python modules
+//   • tfjsKernel — TensorFlow.js (CPU backend) for the deep-learning module
+// Both speak the same request/response protocol, so one class drives both.
 // Handles boot, package preloading, request/response correlation, timeouts and
 // transparent kernel restarts (worker termination + re-boot + package replay).
 
@@ -20,6 +24,15 @@ type Pending = {
   timer?: ReturnType<typeof setTimeout>;
 };
 
+export type KernelKind = "py" | "tfjs";
+
+export interface KernelConfig {
+  workerUrl: string;
+  bootDetail: string;
+  label: string; // ready-detail prefix that identifies this kernel's runtime info
+  restartDetail: string;
+}
+
 class KernelManager {
   private worker: Worker | null = null;
   private pending = new Map<string, Pending>();
@@ -30,8 +43,15 @@ class KernelManager {
 
   status: KernelStatus = "offline";
   detail = "";
-  pythonInfo = "";
+  runtimeInfo = "";
+  readonly kind: KernelKind;
   private listeners = new Set<() => void>();
+
+  constructor(cfg: KernelConfig & { kind: KernelKind }) {
+    this.kind = cfg.kind;
+    this.cfg = cfg;
+  }
+  private cfg: KernelConfig;
 
   subscribe(fn: () => void) {
     this.listeners.add(fn);
@@ -54,8 +74,8 @@ class KernelManager {
   }
 
   private spawnWorker() {
-    this.setStatus("booting", "Downloading Python runtime (first load ~10s)…");
-    const worker = new Worker("/pyodide-worker.js");
+    this.setStatus("booting", this.cfg.bootDetail);
+    const worker = new Worker(this.cfg.workerUrl);
     this.worker = worker;
     worker.onmessage = (ev: MessageEvent<WorkerResponse>) => this.onMessage(ev.data);
     worker.onerror = (ev) => {
@@ -67,8 +87,8 @@ class KernelManager {
   private onMessage(msg: WorkerResponse) {
     if (msg.type === "status") {
       this.setStatus(msg.status, msg.detail || this.detail);
-      if (msg.status === "ready" && msg.detail?.startsWith("Python")) {
-        this.pythonInfo = msg.detail;
+      if (msg.status === "ready" && msg.detail?.startsWith(this.cfg.label)) {
+        this.runtimeInfo = msg.detail;
       }
       return;
     }
@@ -130,7 +150,7 @@ class KernelManager {
   private async restartAfterTimeout() {
     if (this.restartLock) return;
     this.restartLock = true;
-    this.setStatus("restarting", "Restarting kernel after timeout…");
+    this.setStatus("restarting", this.cfg.restartDetail);
     try {
       this.worker?.terminate();
     } catch {
@@ -218,5 +238,26 @@ class KernelManager {
   }
 }
 
-// singleton
-export const kernel = new KernelManager();
+// singletons
+export const kernel = new KernelManager({
+  kind: "py",
+  workerUrl: "/pyodide-worker.js",
+  bootDetail: "Downloading Python runtime (first load ~10s)…",
+  restartDetail: "Restarting kernel after timeout…",
+  label: "Python",
+});
+
+export const tfjsKernel = new KernelManager({
+  kind: "tfjs",
+  workerUrl: "/tfjs-worker.js",
+  bootDetail: "Loading TensorFlow.js…",
+  restartDetail: "Restarting TensorFlow.js kernel…",
+  label: "TensorFlow",
+});
+
+/** Pick the kernel that executes a module (default: the Python/Pyodide kernel). */
+export function kernelForModule(
+  moduleMeta?: { kernel?: KernelKind | string } | null
+): KernelManager {
+  return moduleMeta?.kernel === "tfjs" ? tfjsKernel : kernel;
+}
